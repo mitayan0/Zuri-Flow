@@ -21,7 +21,7 @@ Zuri Flow is a lightweight task queue system using Celery, Redis, and PostgreSQL
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/zuri-flow.git
+git clone https://github.com/mitayan0/Zuri-Flow.git
 cd zuri-flow
 ```
 
