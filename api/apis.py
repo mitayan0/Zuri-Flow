@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 
 from engine_core.models import WorkflowDefinition as ORMWorkflowDefinition, WorkflowRun, TaskInstance, StandaloneTask
 from engine_core.celery_app import celery_app, settings
-from engine_core.orchestrator_tasks import workflow_orchestrator
+from engine_core.orchestrator import workflow_orchestrator
 
 router = APIRouter()
 engine = create_engine(settings.DATABASE_URL)
@@ -52,7 +52,7 @@ def create_workflow_definition(workflow: WorkflowDefinition):
         session.refresh(db_workflow)
         return {"message": "Workflow definition created successfully", "id": db_workflow.id}
 
-@router.post("/definitions/{definition_id}/run")
+@router.post("api/definitions/run/{definition_id}")
 def run_workflow(definition_id: str, background_tasks: BackgroundTasks):
     with Session(engine) as session:
         definition_record = session.query(ORMWorkflowDefinition).filter_by(id=definition_id).first()
@@ -77,7 +77,7 @@ def run_workflow(definition_id: str, background_tasks: BackgroundTasks):
 # Standalone Task Endpoints
 # ----------------------
 
-@router.post("/tasks", status_code=201)
+@router.post("api/tasks", status_code=201)
 def create_standalone_task(task_name: str, executor: str, default_params: dict = None):
     if executor not in settings.QUEUES:
         raise HTTPException(status_code=400, detail=f"Executor must be one of {settings.QUEUES}")
@@ -88,7 +88,7 @@ def create_standalone_task(task_name: str, executor: str, default_params: dict =
         session.refresh(task)
         return {"message": "Standalone task created", "task_id": task.id}
 
-@router.post("/tasks/{task_id}/run")
+@router.post("/tasks/run/{task_id}")
 def run_standalone_task(task_id: str):
     with Session(engine) as session:
         task = session.query(StandaloneTask).filter_by(id=task_id).first()
@@ -104,7 +104,7 @@ def run_standalone_task(task_id: str):
         celery_app.send_task(f"runners.{task.executor}.executor_task", kwargs=payload)
         return {"message": "Task dispatched", "run_id": run_id}
 
-@router.post("/tasks/{task_id}/schedule")
+@router.post("api/tasks/schedule/{task_id}")
 def schedule_standalone_task(task_id: str, interval_seconds: int):
     """
     Schedule a standalone task to run periodically using Celery beat schedule.
@@ -134,7 +134,7 @@ def schedule_standalone_task(task_id: str, interval_seconds: int):
 # Workflow Run Status & Details
 # ----------------------
 
-@router.get("/runs/{run_id}")
+@router.get("api/runs/{run_id}")
 def get_workflow_run_details(run_id: str):
     with Session(engine) as session:
         run_record = session.query(WorkflowRun).filter_by(id=run_id).first()
@@ -144,7 +144,7 @@ def get_workflow_run_details(run_id: str):
         task_records = session.query(TaskInstance).filter_by(run_id=run_id).order_by(TaskInstance.started_at).all()
         return {"run_details": run_record, "task_history": task_records}
 
-@router.get("/runs/{run_id}/status")
+@router.get("api/runs/status/{run_id}")
 def get_workflow_run_status(run_id: str):
     with Session(engine) as session:
         record = session.query(WorkflowRun).filter_by(id=run_id).first()
