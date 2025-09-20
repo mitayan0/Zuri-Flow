@@ -27,14 +27,16 @@ Copy code
 pip install -r requirements.txt
 Ensure Redis and PostgreSQL are running.
 
-Usage
-Start Celery Worker
-bash
-Copy code
+# Celery Project with PostgreSQL Backend and Redis Broker
+
+## Usage
+
+### Start Celery Worker
+```bash
 celery -A celery_app.celery_app worker -l info -P threads
-Define and Run a Task
-python
-Copy code
+
+## Define and Run a Task
+
 from celery_app import celery_app
 
 @celery_app.task
@@ -44,10 +46,13 @@ def add(x, y):
 # Run task
 result = add.delay(10, 20)
 print(result.get(timeout=10))
-TODO
+
+
+📝 TODO
+
  Add support for periodic tasks with RedBeat
 
- Create add celery flower to monitor tasks and workers
+ Add Celery Flower to monitor tasks and workers
 
  Add authentication for task submission API
 
@@ -61,7 +66,7 @@ TODO
 
  Add examples for complex task workflows (chained and group tasks)
 
+🤝 Contributing
 
-
-Contributing
-Contributions are welcome! Please fork the repository and submit a pull request.
+Contributions are welcome!
+Please fork the repository and submit a pull request.
