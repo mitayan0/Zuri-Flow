@@ -1,33 +1,68 @@
-Zuri Flow: Setup and Run Commands
+# Zuri Flow: Setup and Run Commands
 
-# Create a virtual environment (recommended)
-python3 -m venv venv
+## Setup
 
-# Activate the virtual environment
-For macOS/Linux:
-source venv/bin/activate
+# 1. Create a virtual environment (recommended)
+python -m venv venv
 
+# 2. Activate the virtual environment
 # For Windows:
 venv\Scripts\activate
 
-# Install the required Python packages
+# For macOS/Linux:
+source venv/bin/activate
+
+# 3. Install the required Python packages
 pip install -r requirements.txt
 
+# 4. Copy and configure environment variables
+copy .env.example .env  # Windows
+cp .env.example .env    # Linux/macOS
 
+# Then edit .env with your database and Redis connection strings
 
-# Start a single Celery worker for ALL queues
+## Running the Application
 
-celery -A engine_core.celery_app worker --loglevel=info -Q orchestrator,python,bash,c
+# 1. Start FastAPI Server
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-#  Start the simple scheduling service
+# 2. Start Celery Worker (in a new terminal)
+# All queues in one worker:
+celery -A engine_core.celery_app worker --loglevel=info -Q orchestrator,python,javascript,typescript,go,bash,c -P threads
 
-python services/scheduling_service.py
+# OR separate workers per queue (advanced):
+celery -A engine_core.celery_app worker --loglevel=info -Q orchestrator -n orchestrator@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q python -n python@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q javascript -n javascript@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q typescript -n typescript@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q go -n go@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q bash -n bash@%h
+celery -A engine_core.celery_app worker --loglevel=info -Q c -n c@%h
 
+# 3. (Optional) Start Flower for monitoring
+celery -A engine_core.celery_app flower
+# Access at http://localhost:5555
 
----------Simple------
+## Development Commands
 
-# Run FastAPI
+# Run with auto-reload for development
 uvicorn main:app --reload
 
-# Run Celery worker + Beat (RedBeat)
-celery -A engine_core.celery_app.celery_app worker -l info
+# Run Celery worker with debug logging
+celery -A engine_core.celery_app worker --loglevel=debug -Q orchestrator,python,javascript,typescript,go,bash,c
+
+## Testing
+
+# Test API endpoint
+curl http://localhost:8000/
+
+# Create a workflow definition
+curl -X POST http://localhost:8000/api/v1/workflows/definitions \
+  -H "Content-Type: application/json" \
+  -d @examples/python_hello_world.json
+
+# Run a workflow (replace {definition_id} with actual ID)
+curl -X POST http://localhost:8000/api/v1/workflows/definitions/{definition_id}/run
+
+# Check workflow status (replace {run_id} with actual ID)
+curl http://localhost:8000/api/v1/workflows/runs/{run_id}/status

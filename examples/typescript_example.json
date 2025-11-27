@@ -1,0 +1,16 @@
+{
+    "name": "TypeScript Web Scraping",
+    "start_tasks": [
+        "scrape"
+    ],
+    "tasks": {
+        "scrape": {
+            "task_name": "scrape",
+            "executor": "typescript",
+            "dependencies": [],
+            "params": {
+                "code": "interface Result { success: boolean; timestamp: string; }\nconst result: Result = { success: true, timestamp: new Date().toISOString() };\nconsole.log(JSON.stringify(result));"
+            }
+        }
+    }
+}
