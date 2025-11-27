@@ -1,0 +1,14 @@
+{
+  "name": "Python Hello World",
+  "start_tasks": ["greet"],
+  "tasks": {
+    "greet": {
+      "task_name": "greet",
+      "executor": "python",
+      "dependencies": [],
+      "params": {
+        "code": "result = {'message': 'Hello from Python!', 'language': 'python'}"
+      }
+    }
+  }
+}

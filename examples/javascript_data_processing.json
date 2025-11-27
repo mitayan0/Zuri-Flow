@@ -1,0 +1,16 @@
+{
+    "name": "JavaScript Data Processing",
+    "start_tasks": [
+        "fetch_data"
+    ],
+    "tasks": {
+        "fetch_data": {
+            "task_name": "fetch_data",
+            "executor": "javascript",
+            "dependencies": [],
+            "params": {
+                "code": "const data = [1, 2, 3, 4, 5]; const sum = data.reduce((a, b) => a + b, 0); console.log(JSON.stringify({sum, count: data.length, average: sum / data.length}));"
+            }
+        }
+    }
+}

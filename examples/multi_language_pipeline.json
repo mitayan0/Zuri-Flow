@@ -1,0 +1,47 @@
+{
+    "name": "Multi-Language Pipeline",
+    "start_tasks": [
+        "task1"
+    ],
+    "tasks": {
+        "task1": {
+            "task_name": "task1",
+            "executor": "python",
+            "dependencies": [],
+            "params": {
+                "code": "import json\nresult = {'step': 1, 'data': [1, 2, 3, 4, 5]}\nprint(json.dumps(result))"
+            }
+        },
+        "task2": {
+            "task_name": "task2",
+            "executor": "javascript",
+            "dependencies": [
+                "task1"
+            ],
+            "params": {
+                "code": "console.log(JSON.stringify({step: 2, message: 'Processing data from Python'}));"
+            }
+        },
+        "task3": {
+            "task_name": "task3",
+            "executor": "bash",
+            "dependencies": [
+                "task1"
+            ],
+            "params": {
+                "command": "echo 'Step 3: Bash task running in parallel with JS'"
+            }
+        },
+        "task4": {
+            "task_name": "task4",
+            "executor": "go",
+            "dependencies": [
+                "task2",
+                "task3"
+            ],
+            "params": {
+                "code": "package main\nimport \"fmt\"\nfunc main() {\n\tfmt.Println(\"{\\\"step\\\": 4, \\\"message\\\": \\\"Final Go task\\\"}\")\n}"
+            }
+        }
+    }
+}
